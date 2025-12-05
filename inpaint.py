@@ -114,7 +114,7 @@ def multi_inpaint_image(image_path, mask_path, inpaint_method=cv2.INPAINT_TELEA,
     # NOTE: I removed the call to 'process_mask(mask)' here.
     # Why? Because your app.py already processes the mask using the sliders
     # and saves it to 'mask_path'. If we process it again here, 
-    # we override your slider settings!
+    # we override the slider settings!
 
     for _ in range(num_passes):
         image = cv2.inpaint(image, mask, inpaint_radius, inpaint_method)
@@ -127,6 +127,3 @@ def save_inpainted_image(inpainted_image, save_path):
     else: # It's an image (BGR from OpenCV)
         inpainted_image_rgb = cv2.cvtColor(inpainted_image, cv2.COLOR_BGR2RGB)
         Image.fromarray(inpainted_image_rgb).save(save_path)
-
-# --- END OF FILE --- 
-# (Make sure there is NO code below this line)
