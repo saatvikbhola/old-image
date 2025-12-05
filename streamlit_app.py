@@ -42,7 +42,7 @@ model = load_model(model, model_path, device=device)
 uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 if uploaded_image is not None:
     image = Image.open(uploaded_image).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Convert to grayscale for processing
     image_path = "uploaded_image.jpg"
@@ -60,7 +60,7 @@ if uploaded_image is not None:
         # Save and display scratch mask
         scratch_mask_path = "scratch_mask.png"
         save_inpainted_image(scratch_mask, scratch_mask_path)
-        st.image(scratch_mask, caption="Detected Scratch Mask", use_column_width=True, clamp=True, channels="GRAY")
+        st.image(scratch_mask, caption="Detected Scratch Mask", use_container_width=True, clamp=True, channels="GRAY")
 
         # Modify the mask processing based on user inputs
         def custom_process_mask(mask):
@@ -87,6 +87,6 @@ if uploaded_image is not None:
         inpainted_image_pil = Image.fromarray(inpainted_image_rgb)
 
         # Display the inpainted image in Streamlit
-        st.image(inpainted_image_pil, caption="Inpainted Image", use_column_width=True)
+        st.image(inpainted_image_pil, caption="Inpainted Image", use_container_width=True)
     else:
         st.write("Adjust the settings in the sidebar and click 'Confirm' to process the image.")
