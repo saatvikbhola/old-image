@@ -47,25 +47,25 @@ class UNet(nn.Module):
     def forward(self, x):
         # Encoder
         enc1 = self.enc1(x)
-        enc2 = self.enc2(enc1)
-        enc3 = self.enc3(enc2)
-        enc4 = self.enc4(enc3)
+        enc2 = self.enc2(F.max_pool2d(enc1, 2))
+        enc3 = self.enc3(F.max_pool2d(enc2, 2))
+        enc4 = self.enc4(F.max_pool2d(enc3, 2))
 
         # Bottleneck
-        bottleneck = self.bottleneck(enc4)
+        bottleneck = self.bottleneck(F.max_pool2d(enc4, 2))
 
         # Decoder
-        dec4 = self.upconv4(torch.cat([bottleneck, enc4], dim=1))
-        dec4 = F.interpolate(dec4, size=enc4.size()[2:], mode='bilinear', align_corners=False)
+        bottleneck_upsampled = F.interpolate(bottleneck, size=enc4.shape[2:], mode='bilinear', align_corners=False)
+        dec4 = self.upconv4(torch.cat([bottleneck_upsampled, enc4], dim=1))
 
-        dec3 = self.upconv3(torch.cat([dec4, enc3], dim=1))
-        dec3 = F.interpolate(dec3, size=enc3.size()[2:], mode='bilinear', align_corners=False)
+        dec4_upsampled = F.interpolate(dec4, size=enc3.shape[2:], mode='bilinear', align_corners=False)
+        dec3 = self.upconv3(torch.cat([dec4_upsampled, enc3], dim=1))
 
-        dec2 = self.upconv2(torch.cat([dec3, enc2], dim=1))
-        dec2 = F.interpolate(dec2, size=enc2.size()[2:], mode='bilinear', align_corners=False)
+        dec3_upsampled = F.interpolate(dec3, size=enc2.shape[2:], mode='bilinear', align_corners=False)
+        dec2 = self.upconv2(torch.cat([dec3_upsampled, enc2], dim=1))
 
-        dec1 = self.upconv1(torch.cat([dec2, enc1], dim=1))
-        dec1 = F.interpolate(dec1, size=enc1.size()[2:], mode='bilinear', align_corners=False)
+        dec2_upsampled = F.interpolate(dec2, size=enc1.shape[2:], mode='bilinear', align_corners=False)
+        dec1 = self.upconv1(torch.cat([dec2_upsampled, enc1], dim=1))
 
         # Final convolution layer
         out = self.final_conv(dec1)
@@ -81,13 +81,24 @@ def load_model(model, file_path, device="cpu"):
 def detect_scratches(model, image_path, transform):
     device = next(model.parameters()).device
     model.eval()
-    image = Image.open(image_path).convert('L')
-    image = transform(image).unsqueeze(0).to(device)
+    
+    # Store the original size
+    original_image = Image.open(image_path).convert('L')
+    original_size = original_image.size  # (width, height)
+    
+    # Needs to be 256x256 for the model
+    resized_image = original_image.resize((256, 256))
+    
+    image = transform(resized_image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         output = model(image)
         output = torch.sigmoid(output.squeeze(0))
         output = (output.squeeze(0).cpu().numpy() * 255).astype(np.uint8)
+        
+    # Resize the 256x256 output back to the original image size
+    # cv2.resize takes (width, height)
+    output = cv2.resize(output, original_size, interpolation=cv2.INTER_LINEAR)
 
     return output
 

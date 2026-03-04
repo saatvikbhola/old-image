@@ -1,0 +1,33 @@
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+
+# Virtual environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific heavy files that are not needed at runtime 
+# (Note: the model weights `scratch_detection_model.pth` ARE needed so we don't ignore them)
+data/
+notebook*.py
+test scratched image/
+.devcontainer/
+uv.lock
+token.txt
+
+# Temporary/Output files from previous runs
+uploaded_image.jpg
+scratch_mask.png
+inpainted_image.png
