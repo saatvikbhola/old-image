@@ -25,3 +25,6 @@ To run this project locally:
    ```bash
    streamlit run streamlit_app.py
    ```
+
+   ## live on hugginface spaces
+   https://huggingface.co/spaces/fghjhhj9/scratch-detection
